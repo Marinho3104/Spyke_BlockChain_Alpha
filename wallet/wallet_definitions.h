@@ -10,4 +10,17 @@
 
 #define WALLET_SAVE_DEFAULT_PATH "./wallet_information" // Default path to save wallet file
 
+namespace p2p {
+
+    // Connection
+    struct Connection;
+
+    // End Point IP v4
+    struct End_Point_IPv4;
+
+    // End Point IP v6
+    struct End_Point_IPv6;
+
+}
+
 #endif

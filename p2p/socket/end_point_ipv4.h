@@ -16,7 +16,7 @@ namespace p2p {
         int address;
         short port;
 
-        ~End_Point_IPv4(); End_Point_IPv4( int, short ); End_Point_IPv4( void* );
+        ~End_Point_IPv4(); End_Point_IPv4( int, short ); End_Point_IPv4( void*, short ); End_Point_IPv4( void* );
 
         // Returns a ready to use connection with this End_Point information
         Connection* get_connection();

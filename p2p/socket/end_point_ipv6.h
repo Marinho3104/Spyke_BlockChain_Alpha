@@ -17,7 +17,7 @@ namespace p2p {
         unsigned char address[ 16 ];
         short port;
 
-        ~End_Point_IPv6(); End_Point_IPv6( unsigned char*, short ); End_Point_IPv6( void* );
+        ~End_Point_IPv6(); End_Point_IPv6( unsigned char*, short ); End_Point_IPv6( void*, short ); End_Point_IPv6( void* );
 
         // Returns a ready to use connection with this End_Point information
         Connection* get_connection();

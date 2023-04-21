@@ -8,6 +8,7 @@ wallet_test:
 
 	$(MAKE) -C $(crypto_path)
 	$(MAKE) -C $(utils_path)
+	$(MAKE) -C $(p2p_path)
 
 	$(MAKE) -C $(wallet_path) test
 

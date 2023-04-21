@@ -2,7 +2,7 @@
 #ifndef WALLET_WALLET_H
 #define WALLET_WALLET_H
 
-#include "wallet_definitions.h"
+#include "wallet_definitions.h" // struct End_Point
 
 namespace wallet {
 
@@ -10,10 +10,24 @@ namespace wallet {
     // Holds all Wallet settings 
     struct Wallet_Settings {
 
-        //
-        
+        // Nodes to send new requests ( transactions, etc ... )
+        p2p::Connection** node_connections; char node_connections_count;
 
-        ~Wallet_Settings(); Wallet_Settings();
+        ~Wallet_Settings(); Wallet_Settings(); Wallet_Settings( p2p::Connection**, char );
+
+        // Adds a new node connection to the array. 
+        // Realloc new array 
+        void add_new_node_connection( p2p::Connection* );
+
+        // Removes a node by index and reorganizes the rest of the array 
+        // Realloc new array
+        void remove_node_connection( char );
+
+        // Run all diferent wallet settings functions
+        void run();
+
+        // Others 
+        void option_1();
 
     };
 

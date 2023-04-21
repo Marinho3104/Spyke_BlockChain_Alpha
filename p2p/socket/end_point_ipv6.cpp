@@ -19,6 +19,12 @@ p2p::End_Point_IPv6::End_Point_IPv6( unsigned char* __address, short __port ) : 
 
 }
 
+p2p::End_Point_IPv6::End_Point_IPv6( void* __hex, short __port ) : port( __port ) {
+
+    
+
+} 
+
 p2p::End_Point_IPv6::End_Point_IPv6( void* __data ) {
 
     memcpy(
