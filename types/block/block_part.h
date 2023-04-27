@@ -21,9 +21,7 @@ namespace types {
 
         ~Block_Part(); Block_Part( unsigned char*, unsigned char*, int, void* );
 
-        int get_data_representation_length();
-
-        void* get_data_representation();
+        unsigned long long get_data_representation_length();
 
     };
 

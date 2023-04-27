@@ -5,6 +5,7 @@
 #include "end_point_ipv6.h" // End Point IP v6
 #include "connection.h" // struct Conneciton;
 #include "socket_exceptions.h" // struct Unknow_Connection_Version_Exception;
+#include "transaction.h"
 #include "wallet.h"
 
 #include <unistd.h>
@@ -253,6 +254,29 @@ bool wallet::Wallet::verify_signature( unsigned char* __signature, unsigned char
             __original_text_size,
             public_key
         );
+
+}
+
+void wallet::Wallet::sign_transaction( void* __transaction_data ) {
+
+    void* _data_to_sign = 
+        __transaction_data + WALLET_SIGNATURE_LENGTH;
+
+    unsigned char* _signature = 
+        sign_text(
+            ( unsigned char* ) _data_to_sign,
+            TYPES_TRANSACTION_TRANSACTION_FULL_SIZE - TYPES_TRANSACTION_TRANSACTION_FROM_BALANCE_LENGTH - TYPES_TRANSACTION_TRANSACTION_TO_BALANCE_LENGTH -
+                WALLET_SIGNATURE_LENGTH
+        );
+
+    std::cout << verify_signature( _signature, ( unsigned char* ) _data_to_sign, TYPES_TRANSACTION_TRANSACTION_FULL_SIZE - TYPES_TRANSACTION_TRANSACTION_FROM_BALANCE_LENGTH - TYPES_TRANSACTION_TRANSACTION_TO_BALANCE_LENGTH -
+                WALLET_SIGNATURE_LENGTH) << std::endl;
+
+    memcpy(
+        __transaction_data,
+        _signature,
+        WALLET_SIGNATURE_LENGTH
+    );
 
 }
 

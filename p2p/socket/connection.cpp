@@ -15,10 +15,10 @@
 p2p::Connection::~Connection() { free( hint ); free( end_point ); }
 
 p2p::Connection::Connection( char __version, void* __end_point ) : version( __version ), end_point( __end_point ), hint( 0 ), socket_descriptor( -1 ),
-    status( P2P_SOCKET_CONNECTION_STATUS_NOT_CONNECTED ) { sem_init( &sem, 0, 1 ); }
+    status( P2P_SOCKET_CONNECTION_STATUS_NOT_CONNECTED ), data( 0 ) { sem_init( &sem, 0, 1 ); }
 
 p2p::Connection::Connection( char __version, void* __end_point, char __status, int __socket_descriptor, void* __hint )
-    : version( __version ), end_point( __end_point ), status( __status ), socket_descriptor( __socket_descriptor ), hint( __hint ) { sem_init( &sem, 0, 1 ); }
+    : version( __version ), end_point( __end_point ), status( __status ), socket_descriptor( __socket_descriptor ), hint( __hint ), data( 0 ) { sem_init( &sem, 0, 1 ); }
 
 bool p2p::Connection::set_server( int __max_connections ) {
 

@@ -45,6 +45,9 @@ namespace p2p {
         // Semaphore to execute functions synchronize
         sem_t sem;
 
+        // Connection Data
+        void* data;
+
         ~Connection(); 
         
         // Gets Version and End Point

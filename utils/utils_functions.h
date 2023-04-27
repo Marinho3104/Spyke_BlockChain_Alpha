@@ -20,6 +20,10 @@ namespace utils {
     // Returns malloc() value with the byte array
     void* convert_hex_bytes( void*, unsigned long long, bool );
 
+    // Returns all data of a file by given name
+    // Returns malloc()
+    void* get_file_data( char*, long& );
+
 }
 
 #endif

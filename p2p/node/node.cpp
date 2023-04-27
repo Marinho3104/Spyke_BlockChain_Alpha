@@ -434,8 +434,13 @@ void p2p::Node::run() {
         p2p::Sync_Protocol* _sync_protocol = 
             ( p2p::Sync_Protocol* ) malloc( sizeof( p2p::Sync_Protocol ) );
 
+        void* _data = 
+            malloc( 8 );
+
+        for ( int _ = 0; _ < 8; _++ ) *( ( char* ) ( _data + _ ) ) = 0;
+
         new ( _sync_protocol ) p2p::Sync_Protocol(
-            0, 0, 0
+            0, 8, _data
         );
 
         p2p::Packet* _packet =  
@@ -517,7 +522,7 @@ void p2p::Node::handle_packet( p2p::Connection* __connection, char __connection_
                 p2p::Sync_Protocol* _sync_protocol = 
                     p2p::Sync_Protocol::get_sync_protocol_from_packet( _packet_recv );
 
-                _sync_protocol->handle(); break;
+                _sync_protocol->handle( __connection ); break;
             
             }
 

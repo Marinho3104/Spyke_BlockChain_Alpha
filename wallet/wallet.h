@@ -63,6 +63,10 @@ namespace wallet {
         // Return true if it is, or false
         bool verify_signature( unsigned char*, unsigned char*, unsigned long long );
 
+        // Sets the signature of a transaction into the right position
+        // with the information given
+        void sign_transaction( void* );
+
         // Infity loop to run the all diferent functions
         void run();
 

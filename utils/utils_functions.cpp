@@ -54,3 +54,33 @@ void* utils::convert_hex_bytes( void* __hex, unsigned long long __size, bool __i
     return _rtr;
 
 }
+
+void* utils::get_file_data( char* __file_path, long& __file_size ) {
+
+    FILE* _file = 
+        fopen( __file_path, "rb" );
+
+    if ( ! _file ) return 0;
+
+    fseek( _file, 0, SEEK_END );
+
+    long _size = ftell( _file );
+
+    fseek( _file, 0, SEEK_SET );
+
+    void* _data = 
+        malloc( _size );
+
+    fread(
+        _data,
+        _size, 1,
+        _file
+    );
+
+    fclose( _file );
+
+    return _data;
+
+}
+
+

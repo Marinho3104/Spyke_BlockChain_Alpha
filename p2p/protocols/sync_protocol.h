@@ -26,9 +26,9 @@ namespace p2p {
         unsigned long long data_size;
         void* data;
 
-        ~Sync_Protocol(); Sync_Protocol( unsigned char, unsigned long long, void* );
+        ~Sync_Protocol(); Sync_Protocol(); Sync_Protocol( unsigned char, unsigned long long, void* );
 
-        void handle(); 
+        void handle( p2p::Connection* ); 
         
         unsigned long long get_data_representation_size();
 
