@@ -2,6 +2,8 @@
 #ifndef WALLET_WALLET_H
 #define WALLET_WALLET_H
 
+#define WALLET_WALLET_WALLET_SETTINGS_NODE_CONNECTIONS_COUNT_LENGTH 1
+
 #include "wallet_definitions.h" // struct End_Point
 
 namespace wallet {
@@ -25,9 +27,19 @@ namespace wallet {
 
         // Run all diferent wallet settings functions
         void run();
-
-        // Others 
+        
+        // Executes the first option
         void option_1();
+
+        // Gets the total data length
+        unsigned long long get_data_length();
+
+        // Returns all the data of this Wallet_Settings
+        // malloc() data
+        void* get_data();
+
+        // Initialize a Wallet Settings by data
+        static Wallet_Settings* get_wallet_settings_by_data( void* );
 
     };
 
@@ -57,13 +69,20 @@ namespace wallet {
         // Option_1
         void option_1(); 
 
-        // Others
+        // Option_3
+        void option_3(); 
 
         // Save all wallet informations into a file
         void save_into_file( char* );
 
         // Creates a new wallet key pair
         static Wallet* get_new_wallet();
+
+        // Initialize a wallet with data
+        static Wallet* get_wallet_by_data( void* );
+
+        // Initialize a wallet with data from a given file
+        static Wallet* get_wallet_by_file( char* );
 
     };
 

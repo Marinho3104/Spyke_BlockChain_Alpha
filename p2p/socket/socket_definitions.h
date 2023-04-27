@@ -11,6 +11,9 @@ namespace p2p {
     // Connection
     struct Connection;
 
+    // Packet
+    struct Packet;
+
 }
 
 #endif

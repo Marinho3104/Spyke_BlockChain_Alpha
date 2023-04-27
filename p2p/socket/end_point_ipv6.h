@@ -25,6 +25,9 @@ namespace p2p {
         // Get this struct data
         void* get_data();
 
+        // Print the string representation of fields of this connection
+        void print_representation();
+
     };
 
 }

@@ -31,6 +31,18 @@ namespace p2p {
     // Returns true if the server was set, or false 
     bool set_server_IPv6( Connection*, int );
 
+    // Accept a new connection request 
+    // Returns a struct Connection with all information set about the connectionº
+    p2p::Connection* accept_new_connection_request( int );
+
+    // Send a packet to a socket descriptor
+    // Return 1 if succes or 0
+    bool send_packet_to( p2p::Packet*, int );
+
+    // Get a packet from a socket descriptor
+    // Return the packet or 0, if some error occur malloc()
+    p2p::Packet* get_packet_from( int );
+
 }
 
 #endif

@@ -12,6 +12,10 @@
 #define P2P_SOCKET_CONNECTION_STATUS_CONNECTED 1
 #define P2P_SOCKET_CONNECTION_STATUS_SERVER 2
 
+#define P2P_SOCKET_VERSION_LENGTH 1
+#define P2P_SOCKET_END_POINT_V4_LENGTH 1
+
+#include "socket_definitions.h"
 
 #include <semaphore.h>
 #include <sys/socket.h>
@@ -56,6 +60,23 @@ namespace p2p {
         // Connect to end point information
         // Returns true if it establish a connection with end point information
         bool connect();
+
+        // send a packet to this socket descriptor
+        bool send_packet( p2p::Packet* );
+
+        // Print a string representing all fields of this connection
+        void print_representation();
+
+        // Returns the data of end point and ip version length of this conneciton
+        unsigned long long get_data_size();
+
+        // Returns the data of end point and ip version of this connection
+        // malloc() data
+        void* get_data();
+
+        static Connection* get_connection_by_data( void* );
+
+        static Connection* get_new_connection_manually_hex( char );
 
     };
 

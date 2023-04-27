@@ -3,8 +3,28 @@
 
 #include "connection.h"
 #include "end_point_ipv4.h"
+#include "node.h" 
+
+p2p::Node* get_new_node() {
+
+    p2p::Node* _node = ( p2p::Node* ) malloc( sizeof( p2p::Node ) );
+
+    new ( _node ) p2p::Node(
+        p2p::Node_Settings::get_new_node_settings()
+    );
+
+    return _node;    
+
+}
 
 int main() {
+
+    p2p::Node* _node = 
+        p2p::Node::get_node_by_file( "./node_settings" );
+
+    _node->run_interface();
+
+    _node->~Node(); free( _node );
 
     return 0;
     

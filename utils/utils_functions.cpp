@@ -30,10 +30,12 @@ void* utils::convert_bytes_hex( void* __bytes, unsigned long long __size ) {
 
 }
 
-void* utils::convert_hex_bytes( void* __hex, unsigned long long __size ) {
+void* utils::convert_hex_bytes( void* __hex, unsigned long long __size, bool __invert ) {
 
     void* _bytes_value = 
         malloc( __size / 2 ), *_rtr = _bytes_value;
+
+    if ( __invert ) _bytes_value = _bytes_value + __size / 2 - 1;
 
     for ( unsigned long long _ = 0; _ < __size; _ += 2 ) {
 
@@ -45,7 +47,7 @@ void* utils::convert_hex_bytes( void* __hex, unsigned long long __size ) {
 
         *( ( char* ) _bytes_value ) = ( _f << 4 ) | _s;
 
-        _bytes_value = _bytes_value + 1; __hex = __hex + 2;
+        _bytes_value = _bytes_value + ( __invert ? -1 : 1 ); __hex = __hex + 2;
 
     }
 

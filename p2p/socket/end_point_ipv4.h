@@ -13,16 +13,19 @@ namespace p2p {
     // Represents a socket information in IPv4 ( address 4 bytes  ) 
     struct End_Point_IPv4 {
 
-        int address;
-        short port;
+        unsigned int address;
+        unsigned short port;
 
-        ~End_Point_IPv4(); End_Point_IPv4( int, short ); End_Point_IPv4( void*, short ); End_Point_IPv4( void* );
+        ~End_Point_IPv4(); End_Point_IPv4( unsigned int, unsigned short ); End_Point_IPv4( void*, unsigned short ); End_Point_IPv4( void* );
 
         // Returns a ready to use connection with this End_Point information
         Connection* get_connection();
 
         // Get this struct data
         void* get_data();
+
+        // Print a string representation fields of this End Point
+        void print_representation();
 
     };
 

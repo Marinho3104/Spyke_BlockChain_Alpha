@@ -18,7 +18,7 @@ namespace utils {
 
     // Converts a hexadecimal array into a byte array
     // Returns malloc() value with the byte array
-    void* convert_hex_bytes( void*, unsigned long long );
+    void* convert_hex_bytes( void*, unsigned long long, bool );
 
 }
 

@@ -64,3 +64,9 @@ void* p2p::End_Point_IPv6::get_data() {
 
 }
 
+void p2p::End_Point_IPv6::print_representation() {
+
+    std::cout << "Not done";
+
+}
+

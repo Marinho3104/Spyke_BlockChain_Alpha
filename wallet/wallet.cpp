@@ -3,13 +3,25 @@
 #include "ed25519.h" // Ed25519 cryptography    
 #include "end_point_ipv4.h" // End Point IP v4
 #include "end_point_ipv6.h" // End Point IP v6
+#include "connection.h" // struct Conneciton;
+#include "socket_exceptions.h" // struct Unknow_Connection_Version_Exception;
 #include "wallet.h"
 
 #include <unistd.h>
 #include <iostream>
 #include <string.h>
 
-wallet::Wallet_Settings::~Wallet_Settings() { free( node_connections ); }
+wallet::Wallet_Settings::~Wallet_Settings() {  
+    
+    for ( char _ = 0; _ < node_connections_count; _++ ) {
+        
+        ( *( node_connections + _ ) )->~Connection(); free( *( node_connections + _) ); 
+
+    }
+        
+    free( node_connections ); 
+    
+}
 
 wallet::Wallet_Settings::Wallet_Settings() : node_connections( 0 ), node_connections_count( 0 ) {}
 
@@ -32,7 +44,14 @@ void wallet::Wallet_Settings::add_new_node_connection( p2p::Connection* __new_co
 
 void wallet::Wallet_Settings::remove_node_connection( char __index ) {
 
+    p2p::Connection* _to_remove = 
+        *( node_connections + __index );
 
+    _to_remove->~Connection(); free( _to_remove );
+
+    for ( char _ = __index; _ < node_connections_count - 1; _++ ) *( node_connections + _ ) = *( node_connections + _ + 1 );
+
+    node_connections = ( p2p::Connection** ) realloc( node_connections, sizeof( p2p::Connection* ) * --node_connections_count );
 
 }
 
@@ -67,7 +86,9 @@ void wallet::Wallet_Settings::option_1() {
 
     for ( char _ = 0; _ < node_connections_count; _++ ) {
 
-        std::cout << "\t\tI am a connection" << std::endl;
+        std::cout << "\t\t[" << ( int ) _ << "]: ";
+
+        ( *( node_connections + _ ) )->print_representation(); std::cout << std::endl;
 
     }
 
@@ -83,61 +104,101 @@ void wallet::Wallet_Settings::option_1() {
     switch ( *_option.c_str() )
     {
     case '0': 
-
-        {
-
-            std::cout << std::endl;
     
-            std::cout << "\t\tIp version [ 4 / 6 ]: ";
-            std::string _version; std::cin >> _version;
-
-            std::cout << "\t\tAddress: 0x";
-            std::string _address; std::cin >> _address;
-
-            std::cout << "\t\tPort: ";
-            std::string _port; std::cin >> _port;
-
-            if ( *_version.c_str() == '6' ) {
-
-                p2p::End_Point_IPv6* _end_point = 
-                    ( p2p::End_Point_IPv6* ) malloc( sizeof( p2p::End_Point_IPv6 ) );
-
-                new ( _end_point ) p2p::End_Point_IPv6(
-                    ( void* ) _address.c_str(), atoi( _port.c_str() )
-                );
-
-                add_new_node_connection(
-                    _end_point->get_connection()
-                );
-
-            }
-
-            else {
-
-                p2p::End_Point_IPv4* _end_point = 
-                    ( p2p::End_Point_IPv4* ) malloc( sizeof( p2p::End_Point_IPv4 ) );
-
-                new ( _end_point ) p2p::End_Point_IPv4(
-                    ( void* ) _address.c_str(), atoi( _port.c_str() )
-                );
-
-                add_new_node_connection(
-                    _end_point->get_connection()
-                );
-
-            }
-            
-        }
+        add_new_node_connection(
+            p2p::Connection::get_new_connection_manually_hex( 0 )
+        );
 
         break;
 
-    case '1': std::cout << "Remove" << std::endl; break; 
+    case '1': 
+
+        {
+            std::cout << std::endl;
+            std::cout << "\t\tIndex to remove: ";
+            std::string _index; std::cin >> _index;
+
+            remove_node_connection( atoi( _index.c_str() ) ); 
+
+        }
+
+        break; 
+
     default: return; break;
     }
 
     std::string _stop;
 
     std::cin >> _stop;
+
+}
+
+unsigned long long wallet::Wallet_Settings::get_data_length() {
+
+    unsigned long long _length = WALLET_WALLET_WALLET_SETTINGS_NODE_CONNECTIONS_COUNT_LENGTH;
+
+    for ( unsigned long long _ = 0; _ < node_connections_count; _++ ) _length += ( *( node_connections + _ ) )->get_data_size();
+
+    return _length;
+
+}
+
+void* wallet::Wallet_Settings::get_data() {
+
+    void* _data = malloc( get_data_length() ), * _connection_data, *_rtr = _data;
+
+    memcpy(
+        _data,
+        &node_connections_count,
+        WALLET_WALLET_WALLET_SETTINGS_NODE_CONNECTIONS_COUNT_LENGTH
+    ); _data = _data + WALLET_WALLET_WALLET_SETTINGS_NODE_CONNECTIONS_COUNT_LENGTH;
+
+    for ( unsigned long long _ = 0; _ < node_connections_count; _++ ) {
+
+        _connection_data = ( *( node_connections + _  ) )->get_data();
+
+        memcpy(
+            _data,
+            _connection_data,
+            ( *( node_connections + _  ) )->get_data_size()
+        );
+
+        free( _connection_data );
+
+        _data = _data + ( *( node_connections + _  ) )->get_data_size();
+
+    }
+
+    return _rtr;
+
+}
+
+wallet::Wallet_Settings* wallet::Wallet_Settings::get_wallet_settings_by_data( void* __data ) {
+
+    char _node_connections_count = *( ( char* ) __data ); __data = __data + 1;
+
+    p2p::Connection** _node_connections = 
+        ( p2p::Connection** ) malloc( sizeof( p2p::Connection* ) * _node_connections_count );
+
+    for ( char _ = 0; _ < _node_connections_count; _++ ) {
+
+        ( *( _node_connections + _ ) ) = 
+            p2p::Connection::get_connection_by_data( __data );
+
+        __data = __data + ( *( _node_connections + _ ) )->get_data_size();
+
+    }
+
+    wallet::Wallet_Settings* _wallet_settings = 
+        ( wallet::Wallet_Settings* ) malloc( sizeof( wallet::Wallet_Settings ) );
+
+    new ( _wallet_settings ) 
+        wallet::Wallet_Settings(
+            _node_connections,
+            _node_connections_count
+        );
+
+    return _wallet_settings;
 
 }
 
@@ -208,6 +269,7 @@ void wallet::Wallet::run() {
         std::cout << "0: Exit" << std::endl;
         std::cout << "1: Get Key pair information" << std::endl;
         std::cout << "2: Wallet Settings Menu" << std::endl;
+        std::cout << "3: Save wallet info into a file" << std::endl;
 
         std::cout << "\n --> "; std::cin >> _option;
 
@@ -216,6 +278,7 @@ void wallet::Wallet::run() {
             case '0': goto out;
             case '1': option_1(); break;
             case '2': settings->run(); break;
+            case '3': option_3(); break;
 
             default: break;
 
@@ -258,11 +321,49 @@ void wallet::Wallet::option_1() {
 
 } 
 
+void wallet::Wallet::option_3() {
+
+    std::cout << std::endl;
+
+    std::cout << "\tPath of file: ";
+
+    std::string _path; std::cin >> _path;
+
+    save_into_file( ( char* ) _path.c_str() );
+
+} 
+
 
 
 void wallet::Wallet::save_into_file( char* __path ) {
 
+    FILE* _wallet_file = 
+        fopen( __path, "wb" );
 
+    fwrite(
+        private_key,
+        WALLET_PRIVATE_KEY_LENGTH, 1,
+        _wallet_file
+    );
+
+    fwrite(
+        public_key,
+        WALLET_PUBLIC_KEY_LENGTH, 1,
+        _wallet_file
+    );
+
+    void* _wallet_settings_data = 
+        settings->get_data();
+
+    fwrite(
+        _wallet_settings_data,
+        settings->get_data_length(), 1,
+        _wallet_file
+    );
+
+    free( _wallet_settings_data );
+
+    fclose( _wallet_file );
 
 }
 
@@ -296,4 +397,63 @@ wallet::Wallet* wallet::Wallet::get_new_wallet() {
 
 }
 
+wallet::Wallet* wallet::Wallet::get_wallet_by_data( void* __data ) {
+
+    unsigned char private_key[ WALLET_PRIVATE_KEY_LENGTH ], public_key[ WALLET_PUBLIC_KEY_LENGTH ];
+
+    memcpy(
+        private_key,
+        __data,
+        WALLET_PRIVATE_KEY_LENGTH
+    ); 
+
+    memcpy(
+        public_key,
+        __data + WALLET_PRIVATE_KEY_LENGTH,
+        WALLET_PUBLIC_KEY_LENGTH
+    ); 
+
+    wallet::Wallet* _wallet = 
+        ( wallet::Wallet* ) malloc( sizeof( wallet::Wallet ) );
+
+    new ( _wallet ) 
+        wallet::Wallet(
+            private_key, public_key,
+            wallet::Wallet_Settings::get_wallet_settings_by_data( __data + WALLET_PRIVATE_KEY_LENGTH + WALLET_PUBLIC_KEY_LENGTH )
+        );
+
+    return _wallet;
+
+
+}
+
+wallet::Wallet* wallet::Wallet::get_wallet_by_file( char* __file_path ) {
+
+    FILE* _wallet_file = 
+        fopen( __file_path, "rb" );
+
+    fseek( _wallet_file, 0L, SEEK_END );
+
+    long _file_size = ftell( _wallet_file );
+
+    fseek( _wallet_file, 0, SEEK_SET );
+
+    void* _wallet_file_data = malloc( _file_size );
+
+    fread(
+        _wallet_file_data,
+        _file_size, 1,
+        _wallet_file
+    );
+
+    fclose( _wallet_file );
+
+    wallet::Wallet* _wallet =   
+        wallet::Wallet::get_wallet_by_data( _wallet_file_data );
+
+    free( _wallet_file_data );
+
+    return _wallet;
+
+}
 

@@ -5,7 +5,7 @@
 int main() {
 
     wallet::Wallet* _wallet  = 
-        wallet::Wallet::get_new_wallet();
+        wallet::Wallet::get_wallet_by_file( "./wallet_settings");
 
     _wallet->run();
 
