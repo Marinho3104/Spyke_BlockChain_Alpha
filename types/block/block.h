@@ -16,13 +16,18 @@ namespace types {
         
         void* block_parts;
 
-        ~Block();
+        ~Block(); void save_block();
 
-        Block( unsigned long long, unsigned char, void* );
 
-        unsigned long long get_data_representation_length();
+        static unsigned long long get_data_representation_length( unsigned char, void* );
 
-    };
+        static void* get_block_manually( unsigned long long, unsigned char, void* );
+
+        static Block* get_by_data( void* , unsigned long long );
+
+        static Block* get_by_creation_time( unsigned long long* );
+
+    } __attribute__((packed));
 
 }
 

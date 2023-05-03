@@ -67,6 +67,10 @@ namespace wallet {
         // with the information given
         void sign_transaction( void* );
 
+        // Sets the signature of a Block Part into the right position
+        // with the information given
+        void sign_block_part( void*, unsigned long long );
+
         // Infity loop to run the all diferent functions
         void run();
 
@@ -75,6 +79,9 @@ namespace wallet {
 
         // Option_3
         void option_3(); 
+
+        // Option 4
+        void option_4();
 
         // Save all wallet informations into a file
         void save_into_file( char* );

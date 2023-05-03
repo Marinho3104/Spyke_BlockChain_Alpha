@@ -20,9 +20,15 @@ namespace utils {
     // Returns malloc() value with the byte array
     void* convert_hex_bytes( void*, unsigned long long, bool );
 
+    // Create/Open a file and sets the file data to given information
+    void set_file_data( char*, void*, unsigned long long );
+
     // Returns all data of a file by given name
     // Returns malloc()
     void* get_file_data( char*, long& );
+
+    // Converts a given u long long into a string and saves it in global variable
+    void set_char_array_from_u_long_long( void* );
 
 }
 

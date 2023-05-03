@@ -6,6 +6,8 @@
 #include "connection.h" // struct Conneciton;
 #include "socket_exceptions.h" // struct Unknow_Connection_Version_Exception;
 #include "transaction.h"
+#include "socket_functions.h"
+#include "share_protocol.h"
 #include "wallet.h"
 
 #include <unistd.h>
@@ -269,11 +271,37 @@ void wallet::Wallet::sign_transaction( void* __transaction_data ) {
                 WALLET_SIGNATURE_LENGTH
         );
 
-    std::cout << verify_signature( _signature, ( unsigned char* ) _data_to_sign, TYPES_TRANSACTION_TRANSACTION_FULL_SIZE - TYPES_TRANSACTION_TRANSACTION_FROM_BALANCE_LENGTH - TYPES_TRANSACTION_TRANSACTION_TO_BALANCE_LENGTH -
-                WALLET_SIGNATURE_LENGTH) << std::endl;
+    std::cout << "Transaction Verification: " << 
+        verify_signature( _signature, ( unsigned char* ) _data_to_sign, TYPES_TRANSACTION_TRANSACTION_FULL_SIZE - TYPES_TRANSACTION_TRANSACTION_FROM_BALANCE_LENGTH - TYPES_TRANSACTION_TRANSACTION_TO_BALANCE_LENGTH - WALLET_SIGNATURE_LENGTH )
+            << std::endl;
 
     memcpy(
         __transaction_data,
+        _signature,
+        WALLET_SIGNATURE_LENGTH
+    );
+
+    free( _signature );
+
+}
+
+void wallet::Wallet::sign_block_part( void* __block_part_data, unsigned long long __block_part_sign_data_size ) {
+
+    void* _data_to_sign = 
+        __block_part_data + WALLET_SIGNATURE_LENGTH;
+
+    unsigned char* _signature = 
+        sign_text(
+            ( unsigned char* ) _data_to_sign,
+            __block_part_sign_data_size
+        );
+
+    std::cout << "Block Part Verification: " << 
+        verify_signature( _signature, ( unsigned char* ) _data_to_sign, __block_part_sign_data_size )
+            << std::endl;
+
+    memcpy(
+        __block_part_data,
         _signature,
         WALLET_SIGNATURE_LENGTH
     );
@@ -294,6 +322,7 @@ void wallet::Wallet::run() {
         std::cout << "1: Get Key pair information" << std::endl;
         std::cout << "2: Wallet Settings Menu" << std::endl;
         std::cout << "3: Save wallet info into a file" << std::endl;
+        std::cout << "4: Create, sign and send Transaction" << std::endl;
 
         std::cout << "\n --> "; std::cin >> _option;
 
@@ -303,6 +332,7 @@ void wallet::Wallet::run() {
             case '1': option_1(); break;
             case '2': settings->run(); break;
             case '3': option_3(); break;
+            case '4': option_4(); break;
 
             default: break;
 
@@ -356,6 +386,43 @@ void wallet::Wallet::option_3() {
     save_into_file( ( char* ) _path.c_str() );
 
 } 
+
+void wallet::Wallet::option_4() {
+
+    static unsigned long long _nonce = 0;
+
+    unsigned char _to[ WALLET_PUBLIC_KEY_LENGTH ] = { 0 };
+    unsigned long long _amount = 100, _fee = 1; 
+
+    types::Transaction _transaction = 
+        types::Transaction(
+            public_key,
+            _to,
+            _amount, _fee, _nonce++
+        );
+
+    p2p::Share_Protocol _shared_protocol = 
+        p2p::Share_Protocol(
+            0, 1, &_transaction, TYPES_TRANSACTION_TRANSACTION_FULL_SIZE
+        );
+    
+    p2p::Packet* _packet = 
+        _shared_protocol.get_packet();
+
+    for ( int _ = 0; _ < settings->node_connections_count; _++ ) {
+
+        if ( ! ( *( settings->node_connections + _ ) )->connect() ) continue;
+
+        ( *( settings->node_connections + _ ) )->send_packet( _packet );
+
+        p2p::disconnect_from( *( settings->node_connections + _ ) );
+
+        break;
+
+    }
+
+
+}
 
 
 

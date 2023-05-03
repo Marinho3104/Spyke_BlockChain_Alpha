@@ -46,7 +46,7 @@ namespace p2p {
         sem_t sem;
 
         // Connection Data
-        void* data;
+        void* data; int data_size;
 
         ~Connection(); 
         
@@ -55,6 +55,9 @@ namespace p2p {
         
         // Gets Version, End Point, Connection Status, Socket Descriptor and Hint
         Connection( char, void*, char, int, void* );
+
+        // Allocates the given size in data variable
+        void allocate_data( int );
 
         // Set a server up with end point information
         // Returns true if it set the server up, or false

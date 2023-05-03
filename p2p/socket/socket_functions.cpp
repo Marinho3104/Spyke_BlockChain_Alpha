@@ -9,6 +9,7 @@
 #include "socket_functions.h" 
 
 #include <iostream>
+#include <unistd.h>
 #include <string.h>
 
 
@@ -24,6 +25,8 @@ bool p2p::connect_to( Connection* __connection ) {
     throw Unknow_Connection_Version_Exception(); return 0;
 
 }
+
+void p2p::disconnect_from( Connection* __connection ) { close( __connection->socket_descriptor ); }
 
 bool p2p::connect_to_IPv4( Connection* __connection ) {
 

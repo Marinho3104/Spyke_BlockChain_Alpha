@@ -55,6 +55,23 @@ void* utils::convert_hex_bytes( void* __hex, unsigned long long __size, bool __i
 
 }
 
+void utils::set_file_data( char* __file_path, void* __data, unsigned long long __data_size ) {
+
+    FILE* _file = 
+        fopen( __file_path, "wb" );
+
+    if ( ! _file ) return;
+
+    fwrite(
+        __data,
+        __data_size, 1,
+        _file
+    );
+
+    fclose( _file );
+
+}
+
 void* utils::get_file_data( char* __file_path, long& __file_size ) {
 
     FILE* _file = 
@@ -64,16 +81,16 @@ void* utils::get_file_data( char* __file_path, long& __file_size ) {
 
     fseek( _file, 0, SEEK_END );
 
-    long _size = ftell( _file );
+    __file_size = ftell( _file );
 
     fseek( _file, 0, SEEK_SET );
 
     void* _data = 
-        malloc( _size );
+        malloc( __file_size );
 
     fread(
         _data,
-        _size, 1,
+        __file_size, 1,
         _file
     );
 

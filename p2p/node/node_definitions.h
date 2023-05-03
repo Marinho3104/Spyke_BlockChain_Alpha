@@ -8,6 +8,9 @@ namespace p2p {
     // Connection
     struct Connection;
 
+    // Memory Pool
+    struct Memory_Pool;
+
 }
 
 #endif

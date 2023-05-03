@@ -9,10 +9,12 @@
 #define P2P_NODE_NODE_SETTINGS_MAX_ORDINARY_CONNECTIONS_LENGTH 2
 #define P2P_NODE_NODE_SETTINGS_MAX_STABLE_CONNECTIONS_LENGTH 2
 
+#define P2P_NODE_NODE_SETTINGS_MEMORY_POOL_OBJECT_LENGTH 8
+
 #define P2P_NODE_NODE_SETTINGS_INITIAL_CONNECTIONS_COUNT_LENGTH 2
 
 #define P2P_NODE_NODE_CONNECTION_TYPE_ORDINARY_CONNECTION 0
-#define P2P_NODE_NODE_CONNECTION_TYPE_STABLE_CONNECTION 0
+#define P2P_NODE_NODE_CONNECTION_TYPE_STABLE_CONNECTION 1
 
 #include "node_definitions.h" // struct Connection;
 
@@ -30,10 +32,13 @@ namespace p2p {
         // Max stable connections
         unsigned short max_stable_connections;
 
+        // Memory pool objects count
+        unsigned long long memory_pool_objects;
+
         // Initial Connections
         p2p::Connection** initial_connections; unsigned short initial_connections_count;
 
-        ~Node_Settings(); Node_Settings(); Node_Settings( p2p::Connection*, unsigned short, unsigned short, unsigned short, p2p::Connection**, unsigned short );
+        ~Node_Settings(); Node_Settings(); Node_Settings( p2p::Connection*, unsigned short, unsigned short, unsigned long long, unsigned short, p2p::Connection**, unsigned short );
 
         // Prints the current node settings information about its fields
         void print_node_settings_info();
@@ -44,8 +49,8 @@ namespace p2p {
         // Option 1
         void option_1();
 
-        // Option 5
-        void option_5();
+        // Option 6
+        void option_6();
 
         // Add new connection into a initial_connections
         void add_initial_connection( p2p::Connection* );
@@ -86,6 +91,9 @@ namespace p2p {
 
         // Hold all file descriptors
         fd_set file_descriptors; sem_t file_descriptors_sem;
+
+        // Memory Pool
+        Memory_Pool* memory_pool;
 
         ~Node(); Node( Node_Settings* );
 

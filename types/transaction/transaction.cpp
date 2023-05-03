@@ -22,3 +22,13 @@ types::Transaction::Transaction( unsigned char* __from, unsigned char* __to, uns
         memcpy( to, __to, WALLET_PUBLIC_KEY_LENGTH );
 
 }
+
+
+types::Transaction* types::Transaction::get_by_data( void* __data, unsigned long long __data_size ) {
+
+    if ( __data_size < TYPES_TRANSACTION_TRANSACTION_FULL_SIZE ) return 0;
+
+    return 
+        ( types::Transaction* ) __data;
+
+}

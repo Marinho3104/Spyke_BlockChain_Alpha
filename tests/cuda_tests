@@ -1,0 +1,28 @@
+
+
+////
+
+    cudaStream_t stream;
+    cudaStreamCreate(&stream);
+
+    cudaStream_t _stream;
+    cudaStreamCreate(&_stream);
+
+    cudaEvent_t event;
+    cudaEventCreate(&event);
+
+    // Perform computation on device using stream
+    // mm<<<1, 1, 0, _stream>>>();
+
+    // // Record event after kernel launch
+    // cudaEventRecord(event, _stream);
+
+    // Wait for event to complete
+    cudaEventSynchronize(event);
+
+    // Destroy stream and event
+    cudaStreamDestroy(stream);
+    cudaEventDestroy(event);
+
+
+///

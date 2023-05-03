@@ -2,10 +2,12 @@
 #include "socket_functions.h" // accept_new_connection_request();
 #include "node_exceptions.h" // struct Unable_Set_Server_Up;
 #include "connection.h" // struct Connection;
+#include "share_protocol.h"
 #include "disconnect_protocol.h" // sturct Disconnect_Protocol;
 #include "sync_protocol.h" // Sync Protocol
 #include "protocol_ids.h" // Protocol ids
 #include "end_point_ipv4.h"
+#include "memory_pool.h"
 #include "packet.h"
 #include "node.h"
 
@@ -26,11 +28,11 @@ p2p::Node_Settings::~Node_Settings() {
     
 }
 
-p2p::Node_Settings::Node_Settings() : server_connection( 0 ), max_server_connections( 0 ), max_ordinary_connections( 0 ), max_stable_connections( 0 ) {}
+p2p::Node_Settings::Node_Settings() : server_connection( 0 ), max_server_connections( 0 ), max_ordinary_connections( 0 ), max_stable_connections( 0 ), memory_pool_objects( 0 ), initial_connections( 0 ), initial_connections_count( 0 ) {}
 
-p2p::Node_Settings::Node_Settings(p2p::Connection* __server_connection, unsigned short __max_server_connections, unsigned short __max_ordinary_connections, unsigned short __max_stable_connections, p2p::Connection** __initial_connections, unsigned short __initial_connections_count ) 
+p2p::Node_Settings::Node_Settings(p2p::Connection* __server_connection, unsigned short __max_server_connections, unsigned short __max_ordinary_connections, unsigned long long __memory_pool_object, unsigned short __max_stable_connections, p2p::Connection** __initial_connections, unsigned short __initial_connections_count ) 
     : server_connection( __server_connection ), max_server_connections( __max_server_connections ), max_ordinary_connections( __max_ordinary_connections ), 
-        max_stable_connections( __max_stable_connections), initial_connections( __initial_connections ), initial_connections_count( __initial_connections_count ) {}
+        max_stable_connections( __max_stable_connections), memory_pool_objects( __memory_pool_object ), initial_connections( __initial_connections ), initial_connections_count( __initial_connections_count ) {}
 
 void p2p::Node_Settings::print_node_settings_info() {
 
@@ -42,7 +44,7 @@ void p2p::Node_Settings::print_node_settings_info() {
 
     std::cout << "\n" << std::endl;
 
-    std::cout << "\t-> Max Server Connections: " << max_server_connections << " -> Max Ordinary Connections: " << max_ordinary_connections << " -> Max Stable Connections: " << max_stable_connections << std::endl;
+    std::cout << "\t-> Max Server Connections: " << max_server_connections << " -> Max Ordinary Connections: " << max_ordinary_connections << " -> Max Stable Connections: " << max_stable_connections << "-> Memory Pool Objects: " << memory_pool_objects << std::endl;
 
     std::cout << "\n\tInitial Connections (" << initial_connections_count << "):" << std::endl;
 
@@ -68,7 +70,8 @@ beginning:
     std::cout << "2: Change Max Server Connections" << std::endl;
     std::cout << "3: Change Max Ordinary Connections" << std::endl;
     std::cout << "4: Change Max Stable Connections" << std::endl;
-    std::cout << "5: Change Initial Connections" << std::endl;
+    std::cout << "5: Change Memory Pool Objects" << std::endl;
+    std::cout << "6: Change Initial Connections" << std::endl;
 
     std::cout << std::endl;
 
@@ -83,7 +86,8 @@ beginning:
     case '2': std::cout << "\n\tNew Max Server Connections: "; scanf("%hd", &max_server_connections); goto beginning; break; 
     case '3': std::cout << "\n\tNew Max Ordinary Connections: "; scanf("%hd", &max_ordinary_connections); goto beginning; break; 
     case '4': std::cout << "\n\tNew Max Stable Connections: "; scanf("%hd", &max_stable_connections); goto beginning; break; 
-    case '5': option_5(); goto beginning; break;
+    case '5': std::cout << "\n\tNew Memory Pool Objects: "; scanf("%hd", &memory_pool_objects); goto beginning; break; 
+    case '6': option_6(); goto beginning; break;
     default: break;
     }
 
@@ -98,7 +102,7 @@ void p2p::Node_Settings::option_1() {
 
 }
 
-void p2p::Node_Settings::option_5() {
+void p2p::Node_Settings::option_6() {
 
     std::cout << "\n\t0: Add new connection " << std::endl;
     std::cout << "\t1: Remove a connection " << std::endl;
@@ -145,6 +149,8 @@ unsigned long long p2p::Node_Settings::get_data_length() {
     _size += P2P_NODE_NODE_SETTINGS_MAX_ORDINARY_CONNECTIONS_LENGTH;
 
     _size += P2P_NODE_NODE_SETTINGS_MAX_STABLE_CONNECTIONS_LENGTH;
+
+    _size += P2P_NODE_NODE_SETTINGS_MEMORY_POOL_OBJECT_LENGTH;
 
     _size += P2P_NODE_NODE_SETTINGS_INITIAL_CONNECTIONS_COUNT_LENGTH;
 
@@ -205,6 +211,12 @@ void* p2p::Node_Settings::get_data() {
 
     memcpy(
         _data,
+        &memory_pool_objects,
+        P2P_NODE_NODE_SETTINGS_MEMORY_POOL_OBJECT_LENGTH
+    ); _data = _data + P2P_NODE_NODE_SETTINGS_MEMORY_POOL_OBJECT_LENGTH;
+
+    memcpy(
+        _data,
         &initial_connections_count,
         P2P_NODE_NODE_SETTINGS_INITIAL_CONNECTIONS_COUNT_LENGTH
     ); _data = _data + P2P_NODE_NODE_SETTINGS_INITIAL_CONNECTIONS_COUNT_LENGTH;
@@ -242,6 +254,7 @@ p2p::Node_Settings* p2p::Node_Settings::get_new_node_settings() {
 p2p::Node_Settings* p2p::Node_Settings::get_node_settings_by_data( void* __data ) {
 
     unsigned short _max_server_connections = 0, _max_ordinary_connections = 0, _max_stable_connections = 0, _initial_connections_count = 0;
+    unsigned long long _memory_pool_object = 0;
     p2p::Connection** _initial_connections = 0;
     p2p::Connection* _server_connection = 0;
     bool _server_connection_enable;
@@ -275,6 +288,11 @@ p2p::Node_Settings* p2p::Node_Settings::get_node_settings_by_data( void* __data 
 
     __data = __data + 2;
 
+    _memory_pool_object = 
+        *( ( unsigned long long* ) __data ); 
+        
+    __data = __data + 8;
+
     _initial_connections_count = 
         *( ( unsigned short* ) __data ); 
         
@@ -300,6 +318,7 @@ p2p::Node_Settings* p2p::Node_Settings::get_node_settings_by_data( void* __data 
         _max_server_connections,
         _max_ordinary_connections,
         _max_stable_connections,
+        _memory_pool_object,
         _initial_connections,
         _initial_connections_count
     );
@@ -322,6 +341,17 @@ p2p::Node::Node( Node_Settings* __settings ) : settings( __settings ), is_runnin
     for ( unsigned short _ = 0; _ < settings->max_stable_connections; _++ ) *( stable_connections + _ ) = 0;
 
     sem_init( &file_descriptors_sem, 0, 1 ); FD_ZERO( &file_descriptors );
+
+    memory_pool = 
+        ( Memory_Pool* ) malloc( sizeof( Memory_Pool* ) );
+
+    new ( memory_pool ) Memory_Pool( settings->memory_pool_objects );
+
+
+    // Setup all need variables
+
+    // Initialize all need function/variables etc for share protocol execution 
+    initialize_share_protocol_cuda();
     
 }
 
@@ -446,6 +476,24 @@ void p2p::Node::run() {
         p2p::Packet* _packet =  
             _sync_protocol->get_packet();
 
+        (*ordinary_connections)->allocate_data( 8 + 1 );
+
+        char _ = P2P_PROTOCOLS_SYNC_PROTOCOL_STATE_DATA;
+
+        unsigned long long __ = 0;
+
+        memcpy(
+            (*ordinary_connections)->data,
+            &_,
+            1
+        );    
+
+        memcpy(
+            (*ordinary_connections)->data + 1,
+            &__,
+            8
+        );
+
         (*ordinary_connections)->send_packet( _packet ); 
 
     }
@@ -524,6 +572,17 @@ void p2p::Node::handle_packet( p2p::Connection* __connection, char __connection_
 
                 _sync_protocol->handle( __connection ); break;
             
+            }
+
+        case P2P_PROTOCOLS_PROTOCOL_ID_SHARE_PROTOCOL:
+
+            {
+
+                p2p::Share_Protocol* _share_protocol = 
+                    p2p::Share_Protocol::get_share_protocol_from_packet( _packet_recv );
+
+                _share_protocol->handle( __connection ); break;
+
             }
 
         case P2P_PROTOCOLS_PROTOCOL_ID_DISCONNECT_PROTOCOL: default: remove_connection( __connection, __connection_type ); break;

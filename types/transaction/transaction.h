@@ -33,7 +33,10 @@ namespace types {
 
         Transaction( unsigned char*, unsigned char*, unsigned long long, unsigned long long, unsigned long long );
 
-    };
+
+        static Transaction* get_by_data( void*, unsigned long long );
+
+    } __attribute__((packed));
 
 }
 

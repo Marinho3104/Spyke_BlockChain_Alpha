@@ -11,6 +11,9 @@ namespace p2p {
     // Returns the other function return
     bool connect_to( Connection* ); 
 
+    // Executes a disconnection with given socket descriptor 
+    void disconnect_from( Connection* );
+
     // Tries to establish a connection with given information IPv4
     // Returns true if it establish connection, or false 
     bool connect_to_IPv4( Connection* );

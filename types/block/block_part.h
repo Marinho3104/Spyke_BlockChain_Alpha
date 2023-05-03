@@ -11,19 +11,24 @@ namespace types {
 
     struct Block_Part {
 
-        unsigned char miner[ WALLET_PUBLIC_KEY_LENGTH ];
-
         unsigned char signature[ WALLET_SIGNATURE_LENGTH ];
 
-        int transactions_count;
+        unsigned char miner[ WALLET_PUBLIC_KEY_LENGTH ];
+
+        unsigned int transactions_count;
 
         void* transactions;
 
-        ~Block_Part(); Block_Part( unsigned char*, unsigned char*, int, void* );
+        ~Block_Part(); 
 
-        unsigned long long get_data_representation_length();
 
-    };
+        static unsigned long long get_data_representation_length( int );
+
+        static void* get_block_part_manually( unsigned char*, int, void* );
+
+        static Block_Part* get_by_data( void*, unsigned long long );
+
+    } __attribute__((packed));
 
 }
 
